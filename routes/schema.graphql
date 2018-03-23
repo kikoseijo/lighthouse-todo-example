@@ -18,7 +18,7 @@ type Query {
 }
 
 type Mutation {
-  createUser(name: String!, password: String!, email: String!): User
+  createUser(name: String, password: String!, email: String!): User
     @interaction(class: "App\\Http\\GraphQL\\Mutations\\CreateUser")
 
   updateAccount(name: String, email: String @validate(rules: ["email"])): User

@@ -8,6 +8,8 @@ use Nuwave\Lighthouse\Support\Contracts\FieldResolver;
 use Nuwave\Lighthouse\Support\Exceptions\DirectiveException;
 use Nuwave\Lighthouse\Support\Traits\HandlesDirectives;
 
+use Nuwave\Lighthouse\Support\Exceptions\ValidationError;
+
 class InteractionDirective implements FieldResolver
 {
     use HandlesDirectives;
@@ -38,14 +40,8 @@ class InteractionDirective implements FieldResolver
         }));
 
         return $value->setResolver(function ($root, array $args, $context = null, $info = null) use ($className, $data) {
-            // $instance = app($className);
 
-            return $this->interaction($className, [array_merge($args, ['directive' => $data])]);
-
-            // return call_user_func_array(
-            //     [$instance, $method],
-            //     [$root, array_merge($args, ['directive' => $data]), $context, $info]
-            // );
+            return $this->interaction($className, [$args]);
         });
     }
 
@@ -72,7 +68,11 @@ class InteractionDirective implements FieldResolver
 
     protected function interaction($interaction, array $parameters)
     {
-        $this->call($interaction.'@validator', $parameters)->validate();
+        $validator = $this->call($interaction.'@validator', $parameters);
+
+        if ($validator->fails()) {
+            throw with(new ValidationError('validation'))->setValidator($validator);
+        }
 
         return $this->call($interaction, $parameters);
     }
