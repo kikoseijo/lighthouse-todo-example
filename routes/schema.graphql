@@ -2,22 +2,29 @@
 #import ./job.graphql
 
 type User {
-    id: ID!
-    name: String!
-    email: String! @field(class: "App\\Http\\GraphQL\\Types\\UserType" method:"email")
-    created_at: String!
-    updated_at: String!
+  id: ID!
+  name: String!
+  email: String!
+    @field(class: "App\\Http\\GraphQL\\Types\\UserType", method: "email")
+  created_at: String!
+  updated_at: String!
 
-    tasks: [Task!]! @hasMany(type: "paginator")
-    jobs: [Job!]! @hasMany(type: "paginator")
+  tasks: [Task!]! @hasMany(type: "paginator")
+  jobs: [Job!]! @hasMany(type: "paginator")
 }
 
 type Query {
-    me: User @auth # We're currently faking auth w/ middleware, but Passport works quite well here
+  me: User @auth # We're currently faking auth w/ middleware, but Passport works quite well here
 }
 
 type Mutation {
-    updateAccount(name: String email: String @validate(rules: ["email"])): User
-        @field(class: "App\\Http\\GraphQL\\Mutations\\AccountMutator" method: "update")
-        @event(class: "App\\Events\\AccountUpdated")
+  createUser(name: String!, password: String!, email: String!): User
+    @interaction(class: "App\\Http\\GraphQL\\Mutations\\CreateUser")
+
+  updateAccount(name: String, email: String @validate(rules: ["email"])): User
+    @field(
+      class: "App\\Http\\GraphQL\\Mutations\\AccountMutator"
+      method: "update"
+    )
+    @event(class: "App\\Events\\AccountUpdated")
 }
